@@ -215,6 +215,4 @@ if __name__ == "__main__":
         "main:app",
         port=5000,
         reload=True,
-        ssl_certfile="./localhost+1.pem",
-        ssl_keyfile="./localhost+1-key.pem",
     )
