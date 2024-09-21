@@ -2,6 +2,7 @@
 *.pem
 node_modules/
 .env*
+**/.DS_Store
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
