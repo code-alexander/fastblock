@@ -210,11 +210,13 @@ def get(id: str | None = None, uploaded: bool | None = None):
     )
 
 
-if __name__ == "__main__":
-    uvicorn.run(
-        "main:app",
-        port=5000,
-        reload=True,
-        ssl_certfile="./localhost+1.pem",
-        ssl_keyfile="./localhost+1-key.pem",
-    )
+# if __name__ == "__main__":
+#     uvicorn.run(
+#         "main:app",
+#         port=5000,
+#         reload=True,
+#         ssl_certfile="./localhost+1.pem",
+#         ssl_keyfile="./localhost+1-key.pem",
+# #     )
+
+serve()
