@@ -4,6 +4,7 @@ node_modules/
 .env*
 **/.DS_Store
 .DS_Store
+fastblock/src/.DS_Store
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
