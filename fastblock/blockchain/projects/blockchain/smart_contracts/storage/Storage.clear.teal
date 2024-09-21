@@ -1,0 +1,7 @@
+#pragma version 10
+
+smart_contracts.storage.contract.Storage.clear_state_program:
+    // blockchain/projects/blockchain/smart_contracts/storage/contract.py:7
+    // class Storage(ARC4Contract):
+    int 1
+    return
