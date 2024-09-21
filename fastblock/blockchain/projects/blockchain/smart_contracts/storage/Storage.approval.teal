@@ -1,0 +1,126 @@
+#pragma version 10
+
+smart_contracts.storage.contract.Storage.approval_program:
+    // blockchain/projects/blockchain/smart_contracts/storage/contract.py:7
+    // class Storage(ARC4Contract):
+    txn NumAppArgs
+    bz main_bare_routing@5
+    method "store(pay,string)void"
+    txna ApplicationArgs 0
+    match main_store_route@2
+    err // reject transaction
+
+main_store_route@2:
+    // blockchain/projects/blockchain/smart_contracts/storage/contract.py:11
+    // @arc4.abimethod()
+    txn OnCompletion
+    !
+    assert // OnCompletion is NoOp
+    txn ApplicationID
+    assert // is not creating
+    // blockchain/projects/blockchain/smart_contracts/storage/contract.py:7
+    // class Storage(ARC4Contract):
+    txn GroupIndex
+    int 1
+    -
+    dup
+    gtxns TypeEnum
+    int pay
+    ==
+    assert // transaction type is pay
+    txna ApplicationArgs 1
+    extract 2 0
+    // blockchain/projects/blockchain/smart_contracts/storage/contract.py:11
+    // @arc4.abimethod()
+    callsub store
+    int 1
+    return
+
+main_bare_routing@5:
+    // blockchain/projects/blockchain/smart_contracts/storage/contract.py:7
+    // class Storage(ARC4Contract):
+    txn OnCompletion
+    !
+    assert // reject transaction
+    txn ApplicationID
+    !
+    assert // is creating
+    int 1
+    return
+
+
+// smart_contracts.storage.contract.Storage.store(payment: uint64, code: bytes) -> void:
+store:
+    // blockchain/projects/blockchain/smart_contracts/storage/contract.py:11-12
+    // @arc4.abimethod()
+    // def store(self, payment: gtxn.PaymentTransaction, code: String) -> None:
+    proto 2 0
+    // blockchain/projects/blockchain/smart_contracts/storage/contract.py:13
+    // mbr_before = Global.current_application_address.min_balance
+    global CurrentApplicationAddress
+    acct_params_get AcctMinBalance
+    assert // account funded
+    // blockchain/projects/blockchain/smart_contracts/storage/contract.py:15
+    // content_hash = op.sha256(code.bytes)
+    frame_dig -1
+    sha256
+    // blockchain/projects/blockchain/smart_contracts/storage/contract.py:9
+    // self.content = BoxMap(Hash, String)
+    byte "content"
+    // blockchain/projects/blockchain/smart_contracts/storage/contract.py:9-17
+    //     self.content = BoxMap(Hash, String)
+    // 
+    // @arc4.abimethod()
+    // def store(self, payment: gtxn.PaymentTransaction, code: String) -> None:
+    //     mbr_before = Global.current_application_address.min_balance
+    // 
+    //     content_hash = op.sha256(code.bytes)
+    //     # Saves the user paying txn fee if the content is already stored
+    //     assert content_hash not in self.content, "Content already stored"
+    swap
+    concat
+    dup
+    box_len
+    bury 1
+    !
+    // blockchain/projects/blockchain/smart_contracts/storage/contract.py:16-17
+    // # Saves the user paying txn fee if the content is already stored
+    // assert content_hash not in self.content, "Content already stored"
+    assert // Content already stored
+    // blockchain/projects/blockchain/smart_contracts/storage/contract.py:18
+    // self.content[content_hash] = code
+    dup
+    box_del
+    pop
+    frame_dig -1
+    box_put
+    // blockchain/projects/blockchain/smart_contracts/storage/contract.py:20
+    // mbr_after = Global.current_application_address.min_balance
+    global CurrentApplicationAddress
+    acct_params_get AcctMinBalance
+    assert // account funded
+    // blockchain/projects/blockchain/smart_contracts/storage/contract.py:23
+    // payment.receiver == Global.current_application_address
+    frame_dig -2
+    gtxns Receiver
+    global CurrentApplicationAddress
+    ==
+    // blockchain/projects/blockchain/smart_contracts/storage/contract.py:22-24
+    // assert (
+    //     payment.receiver == Global.current_application_address
+    // ), "Receiver must be the app address"
+    assert // Receiver must be the app address
+    // blockchain/projects/blockchain/smart_contracts/storage/contract.py:26
+    // payment.amount >= mbr_after - mbr_before
+    frame_dig -2
+    gtxns Amount
+    swap
+    uncover 2
+    -
+    >=
+    // blockchain/projects/blockchain/smart_contracts/storage/contract.py:25-27
+    // assert (
+    //     payment.amount >= mbr_after - mbr_before
+    // ), "Payment amount must >= the minimum balance requirement delta"
+    assert // Payment amount must >= the minimum balance requirement delta
+    retsub
