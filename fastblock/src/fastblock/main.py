@@ -58,7 +58,8 @@ def dependencies() -> tuple[AlgodClient, IndexerClient, StorageClient]:
     algod = get_algod_client(get_algonode_config("mainnet", "algod", ""))
     indexer = get_indexer_client(get_algonode_config("mainnet", "indexer", ""))
 
-    account = account_from_keyring("MAINNET", "DEPLOYER")
+    # account = account_from_keyring("MAINNET", "DEPLOYER")
+    account = "NJQUSJFFC5WDEIXSSVP4PTINX3LEAE665KHW2GVYGVBJ37CLLTGCI5567U"
 
     storage = deploy_idempotent(account, algod, indexer)
     print(f"{storage.app_id = }")
