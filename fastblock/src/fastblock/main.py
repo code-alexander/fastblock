@@ -43,7 +43,7 @@ app = FastHTML(
         Style(open(Path(__file__).parent / "style.css").read()),
     ),
     htmx=False,  # Load from local file instead of CDN
-    key_fname="tmp/.sesskey"
+    key_fname="/tmp/.sesskey"
 )   
 
 
