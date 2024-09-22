@@ -143,7 +143,7 @@ def get(id: str | None = None, uploaded: bool | None = None):
 
     code_snippet = Div(Pre(Code(code)), id="code-snippet")
     pera = Script(
-        open(Path(__file__).parents[3] / "dist/bundle.js").read(),
+        open("bundle.js").read(),
         type="module",
     )
 
