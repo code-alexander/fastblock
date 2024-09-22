@@ -1,0 +1,9 @@
+{
+  "builds": [
+    {
+      "src": "fastblock/src/fastblock/main.py",
+      "use": "@vercel/python"
+    }
+  ],
+  "routes": [{ "src": "/(.*)", "dest": "fastblock/src/fastblock/main.py" }]
+}
