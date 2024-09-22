@@ -30,6 +30,7 @@ from fastblock.src.fastblock.storage import (
     StorageClient,
 )
 from fastblock.src.fastblock.account import account_from_keyring
+
 app = FastHTML(
     hdrs=(
         picolink,
@@ -40,11 +41,13 @@ app = FastHTML(
         ),
         Style(open(Path(__file__).parent / "style.css").read()),
     ),
-    key_fname="/tmp/.sesskey"
-)   
+    key_fname="/tmp/.sesskey",
+)
 
 
-def dependencies(app_id: int | None = None) -> tuple[AlgodClient, IndexerClient, StorageClient]:
+def dependencies(
+    app_id: int | None = None
+) -> tuple[AlgodClient, IndexerClient, StorageClient]:
     """Returns Algod, Indexer, and storage app clients.
 
     Deploys the storage contract if it hasn't already been deployed.
@@ -54,7 +57,7 @@ def dependencies(app_id: int | None = None) -> tuple[AlgodClient, IndexerClient,
     """
     algod = get_algod_client(get_algonode_config("mainnet", "algod", ""))
     indexer = get_indexer_client(get_algonode_config("mainnet", "indexer", ""))
-    
+
     if app_id:
         return algod, indexer, StorageClient(algod, app_id=app_id)
 
@@ -143,7 +146,7 @@ def get(id: str | None = None, uploaded: bool | None = None):
 
     code_snippet = Div(Pre(Code(code)), id="code-snippet")
     pera = Script(
-        open(Path(__file__).parents[3] / "dist/bundle.js").read(),
+        open(Path(__file__).parent / "bundle.js").read(),
         type="module",
     )
 
