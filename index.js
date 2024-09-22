@@ -13,11 +13,15 @@ let accountAddress = "";
 
 const connectButton = document.getElementById("connect-button");
 connectButton.addEventListener("click", (event) => {
+  // Set loading spinner
+  connectButton.setAttribute("aria-busy", "true");
   if (accountAddress) {
     handleDisconnectWalletClick(event);
   } else {
     handleConnectWalletClick(event);
   }
+  // Remove loading spinner
+  connectButton.setAttribute("aria-busy", "false");
 });
 
 const uploadSection = document.getElementById("upload-section");
