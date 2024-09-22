@@ -34,20 +34,17 @@ app = FastHTML(
     hdrs=(
         picolink,
         HighlightJS(langs=["python", "javascript"]),
-        Script(open(Path(__file__).parent / "htmx.min.js").read()),
-        Script(open(Path(__file__).parent / "fasthtml.js").read()),
         Script(src="https://unpkg.com/algosdk@v2.9.0/dist/browser/algosdk.min.js"),
         Script(
             src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"
         ),
         Style(open(Path(__file__).parent / "style.css").read()),
     ),
-    htmx=False,  # Load from local file instead of CDN
     key_fname="/tmp/.sesskey"
 )   
 
 
-def dependencies() -> tuple[AlgodClient, IndexerClient, StorageClient]:
+def dependencies(app_id: int | None = None) -> tuple[AlgodClient, IndexerClient, StorageClient]:
     """Returns Algod, Indexer, and storage app clients.
 
     Deploys the storage contract if it hasn't already been deployed.
@@ -57,10 +54,11 @@ def dependencies() -> tuple[AlgodClient, IndexerClient, StorageClient]:
     """
     algod = get_algod_client(get_algonode_config("mainnet", "algod", ""))
     indexer = get_indexer_client(get_algonode_config("mainnet", "indexer", ""))
+    
+    if app_id:
+        return algod, indexer, StorageClient(algod, app_id=app_id)
 
-    # account = account_from_keyring("MAINNET", "DEPLOYER")
-    account = "NJQUSJFFC5WDEIXSSVP4PTINX3LEAE665KHW2GVYGVBJ37CLLTGCI5567U"
-
+    account = account_from_keyring("MAINNET", "DEPLOYER")
     storage = deploy_idempotent(account, algod, indexer)
     print(f"{storage.app_id = }")
 
@@ -104,7 +102,7 @@ def get_txns(sender: str, code: str) -> str:
     Returns:
         str: A JSON array of base64-encoded transactions.
     """
-    algod, indexer, storage = dependencies()
+    algod, indexer, storage = dependencies(app_id=2302451247)
     storage.sender = sender
 
     unsigned_txns = (
@@ -126,7 +124,7 @@ def get_txns(sender: str, code: str) -> str:
 @app.route("/")
 def get(id: str | None = None, uploaded: bool | None = None):
     title = "Code Snippet"
-    algod, indexer, storage = dependencies()
+    algod, indexer, storage = dependencies(app_id=2302451247)
     network = "localnet" if is_localnet(algod) else "mainnet"
 
     code = next(

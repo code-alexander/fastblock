@@ -77,7 +77,6 @@ def deploy_idempotent(
 
     return storage
 
-
 def box_name(code: str) -> bytes:
     """Hashes the code to derive the box name (key).
 
