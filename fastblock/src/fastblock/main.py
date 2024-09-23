@@ -95,7 +95,7 @@ def dependencies(
 
 
 @app.get("/txns")
-def get_txns(sender: str, code: str) -> str:
+def get_txns(sender: str, code: str):
     """Returns the encoded transactions to sign.
 
     Args:
