@@ -59,7 +59,7 @@ def dependencies(
     indexer = get_indexer_client(get_algonode_config("mainnet", "indexer", ""))
 
     if app_id:
-        return algod, indexer, StorageClient(algod, app_id=app_id, signer=AccountTransactionSigner(""))
+        return algod, indexer, StorageClient(algod, app_id=app_id)
 
     account = account_from_keyring("MAINNET", "DEPLOYER")
     storage = deploy_idempotent(account, algod, indexer)
@@ -106,6 +106,7 @@ def get_txns(sender: str, code: str) -> str:
         str: A JSON array of base64-encoded transactions.
     """
     algod, indexer, storage = dependencies(app_id=2302451247)
+    storage.signer = AccountTransactionSigner("")
     storage.sender = sender
 
     unsigned_txns = (
