@@ -26,7 +26,6 @@ from fastblock.src.fastblock.storage import (
     storage_cost,
     storage_payment_txn,
     box_name,
-    fetch_boxes,
     StorageClient,
 )
 from fastblock.src.fastblock.account import account_from_keyring
@@ -140,12 +139,10 @@ def snippet(id: str | None, uploaded: bool, request_count: int = 0):
     """
     algod, indexer, storage = dependencies(app_id=2302451247)
 
-    if not id:
-        code = next(
-            iter(fetch_boxes(app_id=storage.app_id, indexer=indexer)),
-            "# No snippets created yet :(",
-        )
-        return Div(Pre(Code(code)), id="code-snippet")
+    id = (
+        id or "10304786245d1a14092de73d13e72f83495122882122df482ce5bcde3a063a82"
+    )  # Default snippet
+
     if request_count > 10:
         return Div(Card(f"Could not find snippet {id}."), id="code-snippet")
     try:
