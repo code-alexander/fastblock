@@ -31,6 +31,7 @@ from fastblock.src.fastblock.storage import (
 )
 from fastblock.src.fastblock.account import account_from_keyring
 
+
 app = FastHTML(
     hdrs=(
         picolink,
@@ -125,27 +126,67 @@ def get_txns(sender: str, code: str):
     return json.dumps([msgpack_encode(x.txn) for x in unsigned_txns])
 
 
+def snippet(id: str | None, uploaded: bool, request_count: int = 0):
+    """Reads a snippet from box storage.
+
+    If no ID is provided, the default snippet is displayed.
+    Otherwise, the indexer is polled every second until the snippet is found.
+    If the snippet is not found after 10 requests, an error message is displayed.
+
+    Args:
+        id (str | None): The snippet ID to search for.
+        uploaded (bool): True if the snippet has been uploaded by the user.
+        request_count (int, optional): The number of requests made. Defaults to 0.
+    """
+    algod, indexer, storage = dependencies(app_id=2302451247)
+
+    if not id:
+        code = next(
+            iter(fetch_boxes(app_id=storage.app_id, indexer=indexer)),
+            "# No snippets created yet :(",
+        )
+        return Div(Pre(Code(code)), id="code-snippet")
+    if request_count > 10:
+        return Div(Card(f"Could not find snippet {id}."), id="code-snippet")
+    try:
+        code = fetch_box(
+            app_id=storage.app_id,
+            indexer=indexer,
+            box_name=b"content" + bytes.fromhex(id),
+        )
+        return Div(
+            P(
+                "Congratulations! 🥳 Your snippet is stored on Algorand:"
+                if uploaded
+                else ""
+            ),
+            Pre(Code(code)),
+            id="code-snippet",
+        )
+    except IndexerHTTPError:
+        return Div(
+            Card(
+                P("Waiting for indexer...", aria_busy="true"),
+                Progress(value=request_count, max=10),
+            ),
+            id="code-snippet",
+            hx_post=f"/snippet/{id}/{uploaded}/{request_count + 1}",
+            hx_trigger="every 1s",
+            hx_swap="outerHTML",
+        )
+
+
+@app.post("/snippet/{id}/{uploaded}/{request_count}")
+def post(id: str, uploaded: bool, request_count: int):
+    return snippet(id, uploaded, request_count)
+
+
 @app.route("/")
 def get(id: str | None = None, uploaded: bool | None = None):
     title = "Code Snippet"
     algod, indexer, storage = dependencies(app_id=2302451247)
     network = "localnet" if is_localnet(algod) else "mainnet"
 
-    code = next(
-        iter(fetch_boxes(app_id=storage.app_id, indexer=indexer)),
-        "# No snippets created yet :(",
-    )
-    if id:
-        try:
-            code = fetch_box(
-                app_id=storage.app_id,
-                indexer=indexer,
-                box_name=b"content" + bytes.fromhex(id),
-            )
-        except IndexerHTTPError:
-            print(f"Invalid box name: {id}")
-
-    code_snippet = Div(Pre(Code(code)), id="code-snippet")
     pera = Script(
         open(Path(__file__).parent / "bundle.js").read(),
         type="module",
@@ -194,13 +235,7 @@ def get(id: str | None = None, uploaded: bool | None = None):
         ),
         Main(
             H1(title),
-            P(
-                "Congratulations! 🥳 Your snippet is stored on Algorand:"
-                if id and uploaded
-                else ""
-            ),
-            P(f"Snippet ID: {id}" if id and not uploaded else ""),
-            code_snippet,
+            snippet(id, uploaded),
             upload_section,
             cls="container",
         ),
