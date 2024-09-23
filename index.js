@@ -14,14 +14,14 @@ let accountAddress = "";
 const connectButton = document.getElementById("connect-button");
 connectButton.addEventListener("click", (event) => {
   // Set loading spinner
-  connectButton.setAttribute("aria-busy", "true");
+  connectButton.ariaBusy = "true";
+  connectButton.innerHTML = "";
+
   if (accountAddress) {
     handleDisconnectWalletClick(event);
   } else {
     handleConnectWalletClick(event);
   }
-  // Remove loading spinner
-  connectButton.setAttribute("aria-busy", "false");
 });
 
 const uploadSection = document.getElementById("upload-section");
@@ -34,7 +34,7 @@ uploadButton.addEventListener("click", (event) => {
   event.preventDefault();
 
   // Set loading spinner
-  uploadButton.setAttribute("aria-busy", "true");
+  uploadButton.ariaBusy = "true";
 
   console.log("Requesting signature from account", accountAddress);
 
@@ -66,7 +66,7 @@ uploadButton.addEventListener("click", (event) => {
           console.log("Content hash:", contentHash);
 
           // Remove loading spinner
-          uploadButton.setAttribute("aria-busy", "false");
+          uploadButton.ariaBusy = "false";
 
           if (txId && contentHash) {
             const currentUrl = new URL(window.location.href);
@@ -109,10 +109,13 @@ function handleConnectWalletClick(event) {
 
       accountAddress = newAccounts[0];
 
+      connectButton.ariaBusy = "false";
       connectButton.innerHTML = "Disconnect";
       uploadSection.style.display = "block";
     })
     .catch((error) => {
+      connectButton.ariaBusy = "false";
+      connectButton.innerHTML = "Connect";
       if (error?.data?.type !== "CONNECT_MODAL_CLOSED") {
         console.log(error);
       }
@@ -120,12 +123,18 @@ function handleConnectWalletClick(event) {
 }
 
 function handleDisconnectWalletClick(event) {
-  peraWallet.disconnect().catch((error) => {
-    console.log(error);
-  });
+  peraWallet
+    .disconnect()
+    .catch((error) => {
+      console.log(error);
+    })
+    .finally(() => {
+      // Remove loading spinner
+      connectButton.ariaBusy = "false";
+      connectButton.innerHTML = "Connect";
+    });
 
   accountAddress = "";
 
-  connectButton.innerHTML = "Connect";
   uploadSection.style.display = "none";
 }
