@@ -197,6 +197,7 @@ def get(id: str | None = None, uploaded: bool | None = None):
             id="code-input",
             name="code",
             placeholder="Paste your code here...",
+            style="min-height: 100px;",
         ),
         Button("Upload", id="upload-button", action="/", method="post", cls="contrast"),
         id="upload-section",
