@@ -59,7 +59,7 @@ def dependencies(
     indexer = get_indexer_client(get_algonode_config("mainnet", "indexer", ""))
 
     if app_id:
-        return algod, indexer, StorageClient(algod, app_id=app_id)
+        return algod, indexer, StorageClient(algod, app_id=app_id, signer=AccountTransactionSigner(""))
 
     account = account_from_keyring("MAINNET", "DEPLOYER")
     storage = deploy_idempotent(account, algod, indexer)
